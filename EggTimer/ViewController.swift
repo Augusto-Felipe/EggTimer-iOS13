@@ -7,9 +7,93 @@
 //
 
 import UIKit
+import Foundation
+import AVFoundation
+
 
 class ViewController: UIViewController {
     
+    @IBOutlet weak var timerLabel: UILabel!
+    @IBOutlet weak var titleLabel: UILabel!
+    @IBOutlet weak var progressBar: UIProgressView!
+    
+    var totalTime = 0
+    var secondsPassed = 0
+    var timer = Timer()
+    
+    let eggTimes = [
+        "Soft": 3,
+        "Medium": 4,
+        "Hard": 7
+    ]
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
 
+    }
+    
+    @objc func updateCounter() {
+        if secondsPassed < totalTime {
+            
+            secondsPassed += 1
+            
+            let percentageProgress = Float(secondsPassed)/Float(totalTime)
+            progressBar.progress = percentageProgress
+            print(Float(percentageProgress))
+                    
+            
+        } else {
+            timer.invalidate()
+            titleLabel.text = "Done"
+            titleLabel.textColor = UIColor.systemGreen
+            playSound()
+        }
+    }
 
+    
+    @IBAction func hardnessSelected(_ sender: UIButton){
+        
+        timer.invalidate()
+        let hardness = sender.currentTitle!
+        totalTime = eggTimes[hardness]!
+        progressBar.progress = 0
+        secondsPassed = 0
+        titleLabel.text = hardness
+        
+        /*
+        switch hardness {
+        case "Soft":
+            print(eggTimes["Soft"]!)
+        case "Medium":
+            print(eggTimes["Medium"]!)
+        case "Hard":
+            print(eggTimes["Hard"]!)
+        default:
+            print("Error")
+        }
+        */
+                
+        
+        timer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(updateCounter), userInfo: nil, repeats: true)
+        
+        
+    }
+    
+    var player: AVAudioPlayer?
+
+    func playSound() {
+        guard let path = Bundle.main.path(forResource: "alarm_sound", ofType:"mp3") else {
+            return }
+        let url = URL(fileURLWithPath: path)
+
+        do {
+            player = try AVAudioPlayer(contentsOf: url)
+            player?.play()
+            
+        } catch let error {
+            print(error.localizedDescription)
+        }
+    }
+    
+    
 }
